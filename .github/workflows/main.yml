@@ -1,0 +1,45 @@
+name: application Build and deploy to Azure Kubernetes Service
+
+on: 
+  push:
+    branches: [cicd]
+  workflow_dispatch:
+  
+env:
+  AZURE_CONTAINER_REGISTRY: .azurecr.io # set this to the name of your container registry
+  IMAGE_NAME: 
+  #DOCKER_PATH: Dockerfile
+  #PROJECT_NAME: MY_PROJECT_NAME              # set this to your project's name
+  AKS_RESOURCE_GROUP: Faster-App-Dev          # set this to the resource group containing your AKS cluster
+  AKS_CLUSTER_NAME: Faster-Technician-App-AKS-DEV  # set this to the name of your AKS cluster
+  NAMESPACE: Faster-Lite-dev
+  
+  #REGISTRY_URL: MY_REGISTRY_URL              # set this to the URL of your registry
+  # If you bake using helm:
+  #CHART_PATH: MY_HELM_FILE                   # set this to the path to your helm file
+  #CHART_OVERRIDE_PATH: MY_OVERRIDE_FILES     # set this to an array of override file paths
+
+
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+	
+    steps:
+    - name: Checkout code
+	  uses: actions/checkout@v4
+	
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with: 
+        dotnet-version: '8.0.x'
+		
+    - name: Resource dependancies
+      run: dotnet restore
+    
+	- name: Build
+      run: dotnet build --no-restore --verbosity normal
+
+	- name: Build and Push Docker Image
+	  run: |
+	    docker build -t faster-lite-dev
