@@ -1,0 +1,98 @@
+Deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harsha-lite-tenant
+  namespace: harsha-lite-dev
+  labels:
+    app.kubernetes.io/name: harsha-lite-tenant
+spec:
+  selector:
+    matchLables:
+      app.kubernetes.io/name: harsha-lite-tenant
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: harsha-lite-tenant
+	spec:
+      imagePullSecrets:
+      -name: harsha-acr-secret  # add pull secret
+      containers:
+        - name: harshalitetenantdev
+          image: harshaappdev.azurecr.io/harshalitetenantdev:tenant-latest
+          imagePullPolicy: Always
+		  ports:
+		    - name: http
+			  containerPort: 8080
+			  protocol: TCP
+		  resources:
+		    requests:
+			  cpu: "200"
+			  memory: "1Gi"
+			limits:
+			  cpu: "500m"
+			  memory:"1Gi"
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: harsha-lite-tenant
+  namespace: harsha-lite-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: harsha-lite-tenant
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harsha-lite-tenant
+  metadata: harsha-lite-dev
+spec:
+  type: clusterIP
+  #type: LoadBalancer
+  selector:
+    app: kubernetes.io/name:harsha-lite-tenant   app # Matches Pods with the label 'app=harsha-lite-tenant'
+  ports:
+    - name: http
+	  protocol: TCP
+      port: 80 # The port the Service itself exposes within the cluster
+      targetPort: 8080 # The port on the Pods where the application is listening
+  #type: NodePort # Exposes the Service on a static port on each Node's IP
+---
+apiVersion: networking.k8s.io/v1 # for versions before 1.14 use extensions/v1beta1
+ kind: Ingress
+ metadata:
+   name: harsha-lite-ingress
+   namespace: harsha-lite-dev
+   annotations:
+     #nginx.ingress.kubernetes.io/rewrite-target: /$1
+	 nginx.ingress.kubernetes.io/use-regex: "true"
+	 kubernetes.io/ingress.class: "nginx"
+ spec:
+   #ingressClassName: nginx-harsha
+   rules:
+    - http:
+        paths:
+          - path: /api (/|$)(.*)
+		    pathType: ImplementationSpecific
+			backend:
+              service:
+			    Name: harsha-lite-tenant
+				port:
+                  number: 8080
+---			
