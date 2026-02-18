@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
   
-env:
+ENV:
   AZURE_CONTAINER_REGISTRY: rg23aks-eehybhbhdxh8cyb9.azurecr.io # set this to the name of your container registry
   #IMAGE_NAME:  
    REPOSITRY: test1                  
