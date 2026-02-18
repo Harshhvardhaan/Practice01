@@ -5,10 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
   
-ENV:
-  AZURE_CONTAINER_REGISTRY: rg23aks-eehybhbhdxh8cyb9.azurecr.io # set this to the name of your container registry
+env:
+  AZURE_CONTAINER_REGISTRY: rg23aks-eehybhbhdxh8cyb9.azurecr.io  # set this to the name of your container registry
   #IMAGE_NAME:  
-   REPOSITRY: test1                  
+  REPOSITRY: test1                  
   #DOCKER_PATH: Dockerfile
   #PROJECT_NAME: MY_PROJECT_NAME              # set this to your project's name
   AKS_RESOURCE_GROUP: rg123                   # set this to the resource group containing your AKS cluster
@@ -24,17 +24,17 @@ jobs:
     - name: Checkout code
 	  uses: actions/checkout@v4
 	
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
-      with: 
-        dotnet-version: '8.0.x'
+ #    - name: Setup .NET 8
+ #      uses: actions/setup-dotnet@v4
+ #      with: 
+ #        dotnet-version: '8.0.x'
 		
-    - name: Restore dependancies
-      run: dotnet restore
+ #    - name: Restore dependancies
+ #      run: dotnet restore
     
-	- name: Build
-      run: dotnet build --no-restore --verbosity normal
+	# - name: Build
+ #      run: dotnet build --no-restore --verbosity normal
 	
-	- name: Build and Push Docker Image
-	  run: |
-	    docker build -t harsha-lite-dev .
+	# - name: Build and Push Docker Image
+	#   run: |
+	#     docker build -t harsha-lite-dev .
